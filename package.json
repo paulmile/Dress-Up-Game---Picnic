@@ -1,6 +1,7 @@
 {
   "name": "react-chakra",
   "version": "0.1.0",
+  "homepage": "https://paulmile.github.io/Dress-Up-Game---Picnic",
   "private": true,
   "dependencies": {
     "@chakra-ui/react": "^3.31.0",
@@ -21,6 +22,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
