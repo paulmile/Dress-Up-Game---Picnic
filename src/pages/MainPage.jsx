@@ -2,9 +2,10 @@ import { Box, Flex, Carousel, IconButton, Icon, Image, Button } from "@chakra-ui
 import { FiArrowLeft, FiArrowRight, FiCamera } from "react-icons/fi";
 import Inventory from "../components/Inventory";
 import Doll from "../components/Doll";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import bg from '../assets/bg3.png';
 import bgMain from '../assets/bg_main.png';
+import html2canvas from 'html2canvas';
 const MainPage = () => {
 
     const skintones = 
@@ -66,6 +67,44 @@ const MainPage = () => {
         { name: 'shoe6', src: require('../assets/feet/shoes_6.png'), thumbnail: require('../assets/feet/shoes_6_thumbnail.png'), w: 200, h: 400 },
     ];
 
+    
+const dollRef = useRef(null);
+
+async function saveDollHtml2Canvas() {
+  try {
+    if (!dollRef.current) throw new Error('dollRef not set');
+    console.log('capture start', dollRef.current);
+    const canvas = await html2canvas(dollRef.current, {
+      backgroundColor: null,
+      useCORS: true,
+      logging: true,
+    });
+    console.log('captured canvas', canvas.width, canvas.height);
+    if (canvas.width === 0 || canvas.height === 0) {
+      throw new Error('Captured canvas has zero size — wrong ref or hidden element');
+    }
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        console.error('toBlob returned null');
+        return alert('Export failed: empty blob');
+      }
+      console.log('blob size', blob.size);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'doll.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      console.log('download triggered');
+    }, 'image/png');
+  } catch (err) {
+    console.error('capture failed', err);
+    alert('Export failed: ' + (err?.message ?? err));
+  }
+}
+
     const [overlays, setOverlays] = useState({});
     const [skintone, setSkintone] = useState();
     const [zCounter, setZCounter] = useState(1);
@@ -108,6 +147,7 @@ const MainPage = () => {
                     width="60vw"
                     position="relative"
                     borderRadius="md"
+                    ref={dollRef}
                 >
                     <Box position="absolute" top="8px" right="8px" display="flex" flexDirection="column" gap="8px" zIndex={50}>
                         {/* show simple round color swatches for skintones */}
@@ -119,6 +159,7 @@ const MainPage = () => {
                                 return (
                                     <Button
                                         key={s.name}
+                                        data-html2canvas-ignore
                                         onClick={() => handleSkintone(s)}
                                         size="sm"
                                         variant={isSelected ? 'solid' : 'outline'}
@@ -145,11 +186,13 @@ const MainPage = () => {
                         legs={overlays.legs}
                         shoes={overlays.feet}
                     />
+                    <Button data-html2canvas-ignore position="absolute" bottom="8px" right="8px" onClick={saveDollHtml2Canvas} variant="subtle" color="purple.500" size="sm">Save</Button>
 
                     
                 </Box>
                 { /* Right Side */}
                 <Box  paddingTop={"5px"} paddingBottom={"5px"} height="100%" width="40vw">
+                    
                     <Flex flexDirection="column" height="100%" width="100%" gap="5px" alignItems="center">
 
                         <Box padding="5px" bg="white" borderRadius={"md"} shadow={"lg"} height="100%" width="90%" display="flex" flexDirection="row" alignItems="center" justifyContent="center">
@@ -172,7 +215,9 @@ const MainPage = () => {
                                 <Inventory items={shoes} type="feet" onSelect={(it, type) => handleOverlay(it, type)} />
                             </Box>
                         </Box>
+                        
                     </Flex>
+                    
                 </Box>
             </Flex>
         </Box>

@@ -22,6 +22,7 @@ const CenteredImage = ({ src, alt, zIndex, anchorX = "0%", anchorY = "0%" }) => 
         maxH="100%"
         maxW="100%"
         pointerEvents="none"
+        crossOrigin="anonymous"
     />
 );
 
